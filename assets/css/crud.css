@@ -1,25 +1,32 @@
-/* ===================== DARK THEME ===================== */
-/* Palette tuned to a navy dashboard look */
+/*  DARK THEME */
 :root{
-  --dark-bg-900:#ffff;     /* page background */
-  --dark-bg-800:#111a2c;     /* app shell / header */
-  --dark-surface:#182235;    /* cards / modals */
-  --dark-surface-2:#1e2a41;  /* table head / raised */
-  --dark-border:#273650;     /* subtle borders */
-  --dark-hover:#223252;      /* row hover */
+  --dark-bg-900:#ffff;    
+  --dark-bg-800:#111a2c;     
+  --dark-surface:#182235;    
+  --dark-surface-2:#1e2a41;  
+  --dark-border:#273650;     
+  --dark-hover:#223252;     
   --text-strong:#e8edf7;
   --text-muted:#a8b5cc;
 
-  /* accents (match the dashboard vibe) */
-  --accent:#3b82f6;          /* blue */
-  --accent-2:#0cb84b;        /* green */
-  --accent-3:#f59e0b;        /* amber */
+  /* accents*/
+  --accent:#3b82f6;         
+  --accent-2:#0cb84b;      
+  --accent-3:#f59e0b;        
   --danger:#ef4444;
 
   /* reuse for Poppins/purple modal */
-  --input-radius:12px;
+ --ff:'Poppins', ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+       Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }
-
+html, body,
+.table, .table td, .table th,
+.modal, .btn, .page-link, .alert,
+.form-control, .form-select, .input-group-text,
+.search-pill .form-control,
+.details-table, .details-table td, .details-table th {
+  font-family: var(--ff) !important;
+}
 /* Page */
 body.theme-dark {
   background: #ffff; 
@@ -39,7 +46,10 @@ body.theme-dark {
   color:var(--text-strong);
   border-bottom:1px solid var(--dark-border);
 }
+
 .theme-dark .table-title h2{ color:var(--text-strong); }
+@media (min-width: 1200px){ .container{ max-width: 1400px; } }
+@media (min-width: 1400px){ .container{ max-width: 1600px; } }
 
 /* Buttons */
 .theme-dark .btn-success{ background:var(--accent-2); border-color:var(--accent-2); }
@@ -54,10 +64,13 @@ body.theme-dark {
   color:var(--text-muted);
   border-bottom:1px solid var(--dark-border);
 }
-.theme-dark .table td, 
-.theme-dark .table th{
-  border-color:var(--dark-border);
+.theme-dark .table td,
+.theme-dark .table th {
+  padding: 14px 16px;   
+  vertical-align: middle; 
+  font-size: 15px;     
 }
+
 .theme-dark .table-striped tbody tr:nth-of-type(odd){
   background:rgba(255,255,255,.02);
 }
@@ -89,13 +102,13 @@ body.theme-dark {
 }
 /* Outer spacing for the main container */
 .container {
-  margin: 60px auto;   /* top/bottom 60px, auto center horizontally */
-  padding: 0 40px 40px 40px; /* left, right, bottom padding */
+  margin: 60px auto;   
+  padding: 0 40px 40px 40px; 
 }
 /* Add breathing space inside the title bar */
 .table-title {
-  padding: 20px 30px;  /* more padding all around */
-  margin: 20px;        /* space between the card and others */
+  padding: 20px 30px;  
+  margin: 20px;        
   border-radius: 8px 8px 0 0;
 }
 
@@ -118,20 +131,20 @@ body.theme-dark {
   border:1px solid var(--dark-border);
 }
 .soft-input.form-control {
-  font-size: 15px;   /* adjust text size */
+  font-size: 15px;  
   padding: 0.45rem 0.75rem;
-  height: auto;        /* auto instead of forced large */
+  height: auto;        
 }
 
 .soft-input.form-select {
-  font-size: 16px;   /* adjust text size */
+  font-size: 16px;   
   padding: 0.45rem 0.75rem;
-  height: auto;        /* auto instead of forced large */
+  height: auto;       
 }
 /* White button style for Add Student */
 .btn-light-dark {
   background: #ffffff;
-  color: #111a2c;        /* dark navy text */
+  color: #111a2c;       
   font-weight: 600;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -140,17 +153,15 @@ body.theme-dark {
 
 .btn-light-dark:hover {
   background: #f1f1f1;
-  color: #000;           /* darker text on hover */
+  color: #000;           
   border-color: #ccc;
 }
 .table-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 10px 10px 10px; /* start=20px, end=20px, bottom=20px */
+  margin: 0 10px 10px 10px; 
 }
-
-/* Special purple Add Student header still applies */
 
 .theme-dark .modal-footer{ background:rgba(255,255,255,.03); border-top:1px solid var(--dark-border); }
 .theme-dark .modal .form-label,
@@ -172,9 +183,11 @@ body.theme-dark {
 }
 
 /* Links / icons in actions */
-.theme-dark a.edit{ color:#fbbf24; }   /* amber */
+.theme-dark a.edit{ color:#1350f8; }   
 .theme-dark a.delete{ color:var(--danger); }
 .theme-dark a.edit:hover, .theme-dark a.delete:hover{ filter:brightness(1.1); }
+.theme-dark a.view { color: #c58702; }          
+.theme-dark a.view:hover { filter: brightness(1.2); }
 
 /* Badge/hint text */
 .theme-dark .hint-text{ color:var(--text-muted); }
@@ -189,19 +202,19 @@ body.theme-dark {
   border-radius: 30px;
   overflow: hidden;
   border: 1px solid #ddd;
-  background: #fff; /* white background */
+  background: #fff; 
 }
 
 .search-pill .form-control {
   border: none;
   box-shadow: none;
-  background: #fff !important; /* force white bg */
-  color: #111 !important;       /* dark text */
+  background: #fff !important;
+  color: #111 !important;       
   font-size: 15px;
 }
 
 .search-pill .form-control::placeholder {
-  color: #666;  /* subtle gray placeholder */
+  color: #666;  
 }
 
 .search-pill .input-group-text {
@@ -241,14 +254,13 @@ body.theme-dark {
   border-color: #415b86;
   box-shadow: 0 0 0 3px rgba(59,130,246,.18);
 }
-/* ================= Success Popup (green check) ================= */
-/* --- Success Popup (matches screenshot) --- */
+/* Success Popup */
 .success-card{
-  background:#16243a;          /* deep navy */
+  background:#16243a;         
   border:0;
-  border-radius:22px;           /* chunky rounded corners */
+  border-radius:22px;          
   color:#fff;
-  padding:28px 28px 24px 28px;  /* roomy */
+  padding:28px 28px 24px 28px;  
   box-shadow:0 20px 50px rgba(0,0,0,.35);
 }
 
@@ -263,19 +275,19 @@ body.theme-dark {
   height:112px;
   margin-inline:auto;
   border-radius:50%;
-  background:#00e023;           /* bright green */
+  background:#00e023;          
   display:grid;
   place-items:center;
   box-shadow:0 10px 24px rgba(0,224,35,.35), inset 0 -6px 10px rgba(0,0,0,.25);
   color:#fff;
-  font-size:64px;               /* check size */
+  font-size:64px;              
 }
 
 .success-title{
   margin:0;
   text-align:center;
   font-weight:600;
-  font-size:28px;               /* similar to screenshot */
+  font-size:28px;              
   letter-spacing:.2px;
 }
 
@@ -289,5 +301,125 @@ body.theme-dark {
   line-height:1.1;
   box-shadow:0 6px 16px rgba(0,224,35,.35);
 }
+#successAddedModal { z-index: 1080; } 
 .success-cta:hover{ filter:brightness(.97); }
 .success-cta:active{ transform:translateY(1px); }
+
+/* Confirm (Delete) Popup) */
+.confirm-card{
+  background:#16243a;
+  border:0;
+  border-radius:22px;
+  color:#fff;
+  padding:28px 28px 24px 28px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+.confirm-body{ display:flex; flex-direction:column; gap:18px; }
+.confirm-icon{
+  width:112px; height:112px; margin-inline:auto; border-radius:50%;
+  background:#ef4444;              
+  display:grid; place-items:center; color:#fff; font-size:64px;
+  box-shadow:0 10px 24px rgba(239,68,68,.35), inset 0 -6px 10px rgba(0,0,0,.25);
+}
+.confirm-title{ margin:0; text-align:center; font-weight:700; font-size:24px; letter-spacing:.2px; }
+.confirm-text{ margin:0; text-align:center; color:#c9d4ea; }
+.confirm-actions{ display:flex; justify-content:flex-end; gap:10px; }
+.confirm-cancel{
+  background:transparent; color:#e8edf7; border:1px solid #3a4b6b; 
+  border-radius:14px; padding:10px 18px; font-weight:600;
+}
+.confirm-cancel:hover{ background:#1c2a44; }
+.confirm-cta{
+  background:#ef4444; color:#0b1220; font-weight:800; border:0; 
+  border-radius:14px; padding:10px 22px; line-height:1.1;
+  box-shadow:0 6px 16px rgba(239,68,68,.35);
+}
+.confirm-cta:hover{ filter:brightness(.97); }
+.confirm-cta:active{ transform:translateY(1px); }
+
+/* keep popups above everything  */
+#deleteConfirmModal,
+#bulkDeleteConfirmModal,
+#successAddedModal { z-index: 1080; }
+.modal { z-index: 1200 !important; }
+.modal-backdrop.show { z-index: 1190 !important; }
+
+/* View Details modal */
+.theme-dark .details-card {
+  background: var(--dark-surface);
+  color: var(--text-strong);
+  border: 1px solid var(--dark-border);
+  border-radius: 22px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.35);
+}
+
+/* header same tone/spacing as add/edit */
+.theme-dark .details-card .modal-header {
+  background: var(--dark-bg-800);
+  color: var(--text-strong);
+  border: none;
+  padding: 14px 20px;
+  border-radius: 22px 22px 0 0;
+}
+.theme-dark .details-card .modal-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.theme-dark .details-card .modal-body {
+  padding: 18px 20px 8px 20px;
+}
+.theme-dark .details-card .modal-footer {
+  border: 0;
+  background: rgba(255,255,255,.03);
+  padding: 14px 20px 20px 20px;
+  border-radius: 0 0 22px 22px;
+}
+
+/* badges near title (status/remarks) */
+.badge-pill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 12px;
+}
+.badge-active   { background: rgba(12,184,75,.18);  color: #9be7b4; border: 1px solid rgba(12,184,75,.35); }
+.badge-inactive { background: rgba(239,68,68,.18);  color: #f5a3a3; border: 1px solid rgba(239,68,68,.35); }
+.badge-hint     { background: rgba(59,130,246,.16); color: #b8d0ff; border: 1px solid rgba(59,130,246,.35); }
+
+/* details table (two columns) */
+.theme-dark .details-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--dark-border);
+}
+.theme-dark .details-table thead th {
+  background: var(--dark-surface-2)!important;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--dark-border);
+  padding: 10px 14px;
+  font-weight: 600;
+}
+.theme-dark .details-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--dark-border);
+  background: #0f1a2e;
+}
+.theme-dark .details-table tr:last-child td { border-bottom: 0; }
+
+/* field icons column */
+.details-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-strong);
+}
+.details-field .bi {
+  opacity: .9;
+  font-size: 15px;
+}
+
+

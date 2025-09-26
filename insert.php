@@ -1,20 +1,20 @@
 <?php
 require __DIR__ . '/db_connect.php';
 
-/* --------- Grab & normalize POST --------- */
+/* Grab & normalize POST */
 $student_id = trim($_POST['student_id'] ?? '');
 $course     = trim($_POST['course'] ?? '');
-$year       = trim($_POST['year'] ?? '');          // <-- matches table
+$year       = trim($_POST['year'] ?? '');          
 $first      = trim($_POST['first_name'] ?? '');
 $middle     = trim($_POST['middle_name'] ?? '');
 $last       = trim($_POST['last_name'] ?? '');
-$suffix     = trim($_POST['suffix'] ?? 'N/A');     // UI only for now
+$suffix     = trim($_POST['suffix'] ?? 'N/A');     
 $section    = trim($_POST['section'] ?? '');
 $status     = trim($_POST['status'] ?? '');
 $email      = trim($_POST['email'] ?? '');
 $remarks    = trim($_POST['remarks'] ?? '');
 
-/* --------- Validation (server-side) --------- */
+/* Validation (server-side) */
 $errors = [];
 if ($student_id === '') $errors[] = 'Student ID is required.';
 if ($course === '')     $errors[] = 'Course is required.';
@@ -32,9 +32,6 @@ if ($errors) {
   exit;
 }
 
-/* --------- Insert (no suffix column yet) ---------
-   If you later add `suffix` to the table, include it here.
---------------------------------------------------- */
 $sql = "INSERT INTO students
   (student_id, first_name, middle_name, last_name, email, course, year, section, status, remarks)
   VALUES (?,?,?,?,?,?,?,?,?,?)";

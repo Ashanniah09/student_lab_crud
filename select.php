@@ -6,7 +6,7 @@ $perPage = max(1, intval($_GET['per'] ?? 5));
 $page    = max(1, intval($_GET['page'] ?? 1));
 $offset  = ($page - 1) * $perPage;
 
-$allowedSort = ['id','student_id','first_name','last_name','email','course','year','section','status','created_at'];
+$allowedSort = ['id','student_id','first_name','last_name','suffix','email','course','year','section','remarks','status','created_at'];
 $sort = $_GET['sort'] ?? 'created_at';
 $sort = in_array($sort, $allowedSort, true) ? $sort : 'created_at';
 $dir  = (strtolower($_GET['dir'] ?? 'desc') === 'asc') ? 'ASC' : 'DESC';
@@ -29,15 +29,17 @@ if ($q !== '') {
       first_name       LIKE ? OR
       middle_name      LIKE ? OR
       last_name        LIKE ? OR
+      suffix           LIKE ? OR
       email            LIKE ? OR
       course           LIKE ? OR
       year             LIKE ? OR
       section          LIKE ? OR
+      remarks          LIKE ? OR
       status           LIKE ?
     )";
   $needle = "%$q%";
-  $params = array_fill(0, 10, $needle);
-  $types  = str_repeat('s', 10);
+  $params = array_fill(0, 12, $needle);
+  $types  = str_repeat('s', 12);
 }
 
 /* ----------------------- counting --------------------------- */
@@ -67,7 +69,7 @@ $res  = $stmt->get_result();
 $rows = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 $stmt->close();
 
-/* flash message */
+/* flash message (for success popup or inline error) */
 $status = $_GET['status'] ?? '';
 $msg    = $_GET['msg'] ?? '';
 
@@ -86,33 +88,15 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
   <title>Manage Students</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Poppins -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 + Icons -->
+  <!-- Bootstrap + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- Custom styles -->
+  <!-- Your theme CSS -->
   <link rel="stylesheet" href="assets/css/crud.css">
-
-  <style>
-    body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,sans-serif;}
-    /* white search pill */
-    .search-wrap .search-pill{
-      background:#fff; border:1px solid #e5e7eb; border-radius:999px; overflow:hidden;
-    }
-    .search-wrap .input-group-text{ background:#fff; border:0; }
-    .search-wrap .form-control{ border:0; color:#111827; }
-    .search-wrap .form-control::placeholder{ color:#6b7280; }
-    .search-wrap .btn-clear{ border:0; background:#fff; color:#6b7280; }
-    .search-wrap .btn-clear:hover{ color:#111827; }
-
-    /* footer spacing */
-    .table-footer{display:flex;justify-content:space-between;align-items:center;margin: 0 20px 20px 20px;}
-  </style>
 </head>
 
 <body class="theme-dark">
@@ -123,15 +107,14 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
       <h2 class="m-0 fw-bold">Manage Students</h2>
 
       <div class="d-flex align-items-center gap-3 flex-wrap">
-        <!-- Search pill -->
+        <!-- Search -->
         <form class="search-wrap" role="search" method="get" action="">
-          <?php foreach (['sort','dir','per','page'] as $keep)
+          <?php foreach (['sort','dir','per'] as $keep)
             if (isset($_GET[$keep])) echo '<input type="hidden" name="'.$keep.'" value="'.htmlspecialchars($_GET[$keep]).'">'; ?>
           <div class="input-group search-pill">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
             <input class="form-control" type="search" name="q" placeholder="Search" value="<?= htmlspecialchars($q) ?>" aria-label="Search">
-            <?php if ($q!==''): ?>
-              <?php $qsNoQ=$qs; unset($qsNoQ['q']); ?>
+            <?php if ($q!==''): $qsNoQ=$qs; unset($qsNoQ['q']); ?>
               <a class="btn btn-clear" title="Clear" href="?<?= http_build_query($qsNoQ) ?>"><i class="bi bi-x-lg"></i></a>
             <?php endif; ?>
           </div>
@@ -141,18 +124,16 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
           <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
             <i class="bi bi-plus-lg"></i> <span>Add New Student</span>
           </button>
-          <button class="btn btn-danger" id="bulkDeleteBtn" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" disabled>
-            <i class="bi bi-trash-fill"></i> <span>Delete</span>
-          </button>
         </div>
       </div>
     </div>
 
-   <?php if ($msg && $status !== 'success'): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <!-- show only error inline (success uses popup) -->
+    <?php if ($msg && $status !== 'success'): ?>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <?= htmlspecialchars($msg, ENT_QUOTES) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+      </div>
     <?php endif; ?>
 
     <form id="bulkForm" method="post" action="delete_bulk.php">
@@ -171,6 +152,7 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
           <th><?= sortLink('First Name','first_name',$sort,$dir,$page,$perPage,$q) ?></th>
           <th>Middle Name</th>
           <th><?= sortLink('Last Name','last_name',$sort,$dir,$page,$perPage,$q) ?></th>
+          <th><?= sortLink('Suffix','suffix',$sort,$dir,$page,$perPage,$q) ?></th>
           <th><?= sortLink('Email Address','email',$sort,$dir,$page,$perPage,$q) ?></th>
           <th><?= sortLink('Course','course',$sort,$dir,$page,$perPage,$q) ?></th>
           <th><?= sortLink('Year','year',$sort,$dir,$page,$perPage,$q) ?></th>
@@ -195,6 +177,7 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
             <td><?= htmlspecialchars($r['first_name']) ?></td>
             <td><?= htmlspecialchars($r['middle_name'] ?? '') ?></td>
             <td><?= htmlspecialchars($r['last_name']) ?></td>
+            <td><?= htmlspecialchars($r['suffix'] ?? '') ?></td>
             <td><?= htmlspecialchars($r['email']) ?></td>
             <td><?= htmlspecialchars($r['course'] ?? '') ?></td>
             <td><?= htmlspecialchars($r['year'] ?? '') ?></td>
@@ -202,18 +185,54 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
             <td><?= htmlspecialchars($r['remarks'] ?? '') ?></td>
             <td><?= htmlspecialchars($r['status'] ?? '') ?></td>
             <td class="text-end">
-              <a href="#" class="edit me-2" data-bs-toggle="modal" data-bs-target="#editModal"
-                 data-id="<?= $r['id'] ?>"
-                 data-first="<?= htmlspecialchars($r['first_name'],ENT_QUOTES) ?>"
-                 data-middle="<?= htmlspecialchars($r['middle_name'] ?? '',ENT_QUOTES) ?>"
-                 data-last="<?= htmlspecialchars($r['last_name'],ENT_QUOTES) ?>"
-                 data-email="<?= htmlspecialchars($r['email'],ENT_QUOTES) ?>"
-                 title="Edit"><i class="bi bi-pencil-square fs-5"></i></a>
+            <!-- VIEW -->
+            <a href="#"
+                class="view me-2"
+                data-bs-toggle="modal"
+                data-bs-target="#viewModal"
+                title="View details"
+                data-id="<?= $r['id'] ?>"
+                data-student_id="<?= htmlspecialchars($r['student_id'] ?? '',ENT_QUOTES) ?>"
+                data-first="<?= htmlspecialchars($r['first_name'] ?? '',ENT_QUOTES) ?>"
+                data-middle="<?= htmlspecialchars($r['middle_name'] ?? '',ENT_QUOTES) ?>"
+                data-last="<?= htmlspecialchars($r['last_name'] ?? '',ENT_QUOTES) ?>"
+                data-suffix="<?= htmlspecialchars($r['suffix'] ?? '',ENT_QUOTES) ?>"
+                data-email="<?= htmlspecialchars($r['email'] ?? '',ENT_QUOTES) ?>"
+                data-course="<?= htmlspecialchars($r['course'] ?? '',ENT_QUOTES) ?>"
+                data-year="<?= htmlspecialchars($r['year'] ?? '',ENT_QUOTES) ?>"
+                data-section="<?= htmlspecialchars($r['section'] ?? '',ENT_QUOTES) ?>"
+                data-remarks="<?= htmlspecialchars($r['remarks'] ?? '',ENT_QUOTES) ?>"
+                data-status="<?= htmlspecialchars($r['status'] ?? '',ENT_QUOTES) ?>"
+            ><i class="bi bi-eye fs-5"></i></a>
 
-              <a href="#" class="delete" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                 data-id="<?= $r['id'] ?>"
-                 data-name="<?= htmlspecialchars(trim(($r['first_name'] ?? '').' '.($r['last_name'] ?? '')),ENT_QUOTES) ?>"
-                 title="Delete"><i class="bi bi-trash-fill fs-5"></i></a>
+            <!-- EDIT -->
+            <a href="#"
+                class="edit me-2"
+                data-bs-toggle="modal"
+                data-bs-target="#editModal"
+                title="Edit"
+                data-id="<?= $r['id'] ?>"
+                data-student_id="<?= htmlspecialchars($r['student_id'] ?? '',ENT_QUOTES) ?>"
+                data-first="<?= htmlspecialchars($r['first_name'] ?? '',ENT_QUOTES) ?>"
+                data-middle="<?= htmlspecialchars($r['middle_name'] ?? '',ENT_QUOTES) ?>"
+                data-last="<?= htmlspecialchars($r['last_name'] ?? '',ENT_QUOTES) ?>"
+                data-email="<?= htmlspecialchars($r['email'] ?? '',ENT_QUOTES) ?>"
+                data-course="<?= htmlspecialchars($r['course'] ?? '',ENT_QUOTES) ?>"
+                data-year="<?= htmlspecialchars($r['year'] ?? '',ENT_QUOTES) ?>"
+                data-suffix="<?= htmlspecialchars($r['suffix'] ?? '',ENT_QUOTES) ?>"
+                data-section="<?= htmlspecialchars($r['section'] ?? '',ENT_QUOTES) ?>"
+                data-status="<?= htmlspecialchars($r['status'] ?? '',ENT_QUOTES) ?>"
+                data-remarks="<?= htmlspecialchars($r['remarks'] ?? '',ENT_QUOTES) ?>"
+            ><i class="bi bi-pencil-square fs-5"></i></a>
+
+            <!-- DELETE -->
+            <a href="#"
+                class="delete"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteConfirmModal"
+                data-id="<?= $r['id'] ?>"
+                data-name="<?= htmlspecialchars(trim(($r['first_name'] ?? '').' '.($r['last_name'] ?? '')),ENT_QUOTES) ?>"
+                title="Delete"><i class="bi bi-trash-fill fs-5"></i></a>
             </td>
           </tr>
         <?php endforeach; endif; ?>
@@ -249,7 +268,7 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
   </div>
 </div>
 
-<!-- ===================== Add Modal ===================== -->
+<!-- Add Modal-->
 <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <form id="addForm" class="modal-content needs-validation" action="insert.php" method="post" novalidate>
@@ -260,7 +279,6 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
 
       <div class="modal-body p-4">
         <div class="row g-3">
-          <!-- Row: ID / Course / Year -->
           <div class="col-md-4">
             <label class="form-label">Student ID</label>
             <input type="text" name="student_id" class="form-control soft-input"
@@ -284,7 +302,6 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
             <div class="invalid-feedback">Year is required.</div>
           </div>
 
-          <!-- Row: First / Middle / Last / Suffix -->
           <div class="col-md-6">
             <label class="form-label">First Name</label>
             <input type="text" name="first_name" class="form-control soft-input"
@@ -316,7 +333,6 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
             <div class="invalid-feedback">Suffix is required. Select <strong>N/A</strong> if you don’t have one.</div>
           </div>
 
-          <!-- Row: Section / Status -->
           <div class="col-md-4">
             <label class="form-label">Section</label>
             <input type="text" name="section" class="form-control soft-input"
@@ -333,24 +349,23 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
             <div class="invalid-feedback">Status is required.</div>
           </div>
 
-          <!-- Row: Email -->
           <div class="col-md-12">
             <label class="form-label">Email Address</label>
             <input type="email" name="email" class="form-control soft-input" required maxlength="190">
             <div class="invalid-feedback">Please enter a valid email address.</div>
           </div>
 
-        <!-- Row: Remarks -->
-        <div class="col-md-6">
-        <label class="form-label">Remarks</label>
-        <select name="remarks" class="form-select soft-input">
-            <option value="" selected>Select</option>
-            <option value="Transferee">Transferee</option>
-            <option value="Old Student">Old Student</option>
-            <option value="New Student">New Student</option>
-        </select>
-        <div class="invalid-feedback">Please choose a valid remark.</div>
+          <div class="col-md-6">
+            <label class="form-label">Remarks</label>
+            <select name="remarks" class="form-select soft-input">
+              <option value="" selected>Select</option>
+              <option value="Old Student">Old Student</option>
+              <option value="New Student">New Student</option>
+              <option value="Transferee">Transferee</option>
+            </select>
+          </div>
         </div>
+      </div>
 
       <div class="modal-footer border-0 p-4">
         <button class="btn btn-light-dark px-4 py-2 rounded-3 ms-auto">Add Student</button>
@@ -358,41 +373,184 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
     </form>
   </div>
 </div>
-
-<!-- ===================== Edit Modal (stub) ===================== -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" action="update.php" method="post" novalidate>
+<!--VIEW DETAILS Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content details-card">
       <div class="modal-header">
-        <h5 class="modal-title">Edit Student</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title">User Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span id="view-status-badge"  class="badge badge-pill"></span>
+          <span id="view-remarks-badge" class="badge badge-pill badge-hint d-none"></span>
+          <span class="ms-auto small text-muted" id="view-email-top"></span>
+        </div>
+
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th style="width:220px">Field</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="details-field"><i class="bi bi-person-badge"></i> Full Name</td>
+              <td id="v-fullname"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-envelope"></i> Email</td>
+              <td id="v-email"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-hash"></i> Student ID</td>
+              <td id="v-studentid"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-mortarboard"></i> Course</td>
+              <td id="v-course"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-123"></i> Year</td>
+              <td id="v-year"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-diagram-3"></i> Section</td>
+              <td id="v-section"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-type"></i> Suffix</td>
+              <td id="v-suffix"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-toggle-on"></i> Status</td>
+              <td id="v-status"></td>
+            </tr>
+            <tr>
+              <td class="details-field"><i class="bi bi-chat-left-text"></i> Remarks</td>
+              <td id="v-remarks"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light-dark ms-auto" data-bs-dismiss="modal">Back to list</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- EDIT Modal (mirrors Add)-->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <form class="modal-content needs-validation" action="update.php" method="post" novalidate>
+      <div class="modal-header bg-brand text-white py-3 rounded-top-4 border-0">
+        <h5 class="modal-title fw-bold text-uppercase">Edit Student</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body p-4">
         <input type="hidden" name="id" id="edit-id">
-        <div class="mb-3">
-          <label class="form-label">First Name</label>
-          <input type="text" name="first_name" id="edit-first" class="form-control" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Middle Name</label>
-          <input type="text" name="middle_name" id="edit-middle" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Last Name</label>
-          <input type="text" name="last_name" id="edit-last" class="form-control" required>
-        </div>
-        <div class="mb-0">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" id="edit-email" class="form-control" required>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Student ID</label>
+            <input type="text" name="student_id" id="edit-student_id" class="form-control soft-input"
+                   required pattern="^[A-Za-z0-9\-_.]+$" maxlength="50">
+            <div class="invalid-feedback">Student ID is required (letters/numbers, dashes, underscores, or dots).</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Course</label>
+            <input type="text" name="course" id="edit-course" class="form-control soft-input"
+                   required pattern="^[A-Za-z0-9\s\-&()./]+$" maxlength="100">
+            <div class="invalid-feedback">Course is required.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Year</label>
+            <select name="year" id="edit-year" class="form-select soft-input" required>
+              <option value="" selected>Select</option>
+              <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option><option>5th</option>
+            </select>
+            <div class="invalid-feedback">Year is required.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">First Name</label>
+            <input type="text" name="first_name" id="edit-first" class="form-control soft-input"
+                   required pattern="^[A-Za-z\s]+$" maxlength="100">
+            <div class="invalid-feedback">First name is required and must contain letters only.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Middle Name (Optional)</label>
+            <input type="text" name="middle_name" id="edit-middle" class="form-control soft-input"
+                   pattern="^[A-Za-z\s]*$" maxlength="100">
+            <div class="invalid-feedback">Middle name should contain letters only.</div>
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="last_name" id="edit-last" class="form-control soft-input"
+                   required pattern="^[A-Za-z\s]+$" maxlength="100">
+            <div class="invalid-feedback">Last name is required and must contain letters only.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Suffix Name</label>
+            <select name="suffix" id="edit-suffix" class="form-select soft-input" required>
+              <option value="" selected>Select</option>
+              <option value="N/A">N/A</option>
+              <option>Jr.</option><option>Sr.</option><option>I</option><option>II</option><option>III</option><option>IV</option>
+            </select>
+            <div class="invalid-feedback">Suffix is required. Select <strong>N/A</strong> if none.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Section</label>
+            <input type="text" name="section" id="edit-section" class="form-control soft-input"
+                   required pattern="^[A-Za-z0-9\- ]+$" maxlength="50" placeholder="e.g., A-1">
+            <div class="invalid-feedback">Section is required (letters, numbers, spaces or dashes).</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select name="status" id="edit-status" class="form-select soft-input" required>
+              <option value="" selected>Select</option>
+              <option>Active</option><option>Inactive</option>
+            </select>
+            <div class="invalid-feedback">Status is required.</div>
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" id="edit-email" class="form-control soft-input" required maxlength="190">
+            <div class="invalid-feedback">Please enter a valid email address.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Remarks</label>
+            <select name="remarks" id="edit-remarks" class="form-select soft-input">
+              <option value="" selected>Select</option>
+              <option value="Old Student">Old Student</option>
+              <option value="New Student">New Student</option>
+              <option value="Transferee">Transferee</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-info text-white">Save</button>
+
+      <div class="modal-footer border-0 p-4">
+        <button class="btn btn-light-dark px-4 py-2 rounded-3 ms-auto">Save Changes</button>
       </div>
     </form>
   </div>
 </div>
-<!-- Success Popup -->
+
+<!--Success Popup-->
 <div class="modal fade" id="successAddedModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content success-card">
@@ -408,40 +566,43 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
     </div>
   </div>
 </div>
-<!-- ===================== Delete Modals (stubs) ===================== -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" action="delete.php" method="post">
-      <div class="modal-header">
-        <h5 class="modal-title">Delete Student</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
+
+<!-- Delete Popups (success-style) -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content confirm-card" action="delete.php" method="post">
+      <div class="confirm-body">
         <input type="hidden" name="id" id="delete-id">
-        <p>Are you sure you want to delete <strong id="delete-name"></strong>?</p>
-        <p class="text-warning mb-0"><small>This action cannot be undone.</small></p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger">Delete</button>
+        <div class="confirm-icon"><i class="bi bi-x-lg"></i></div>
+        <h4 class="confirm-title">Delete Student</h4>
+        <p class="confirm-text">
+          Are you sure you want to delete <strong id="delete-name"></strong>?<br/>
+          <span style="color:#fbb4b4">This action cannot be undone.</span>
+        </p>
+        <div class="confirm-actions">
+          <button type="button" class="btn confirm-cancel" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn confirm-cta" type="submit">Delete</button>
+        </div>
       </div>
     </form>
   </div>
 </div>
 
-<div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" method="post" action="delete_bulk.php" onsubmit="return prepBulkDelete()">
-      <div class="modal-header">
-        <h5 class="modal-title">Delete Selected</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
+<div class="modal fade" id="bulkDeleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content confirm-card" method="post" action="delete_bulk.php" onsubmit="return prepBulkDelete()">
+      <div class="confirm-body">
         <input type="hidden" name="ids" id="bulkIdsConfirm">
-        <p>Are you sure you want to delete the selected records?</p>
-        <p class="text-warning mb-0"><small>This action cannot be undone.</small></p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger">Delete</button>
+        <div class="confirm-icon"><i class="bi bi-x-lg"></i></div>
+        <h4 class="confirm-title">Delete Selected</h4>
+        <p class="confirm-text">
+          Are you sure you want to delete the selected records?<br/>
+          <span style="color:#fbb4b4">This action cannot be undone.</span>
+        </p>
+        <div class="confirm-actions">
+          <button type="button" class="btn confirm-cancel" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn confirm-cta" type="submit">Delete</button>
+        </div>
       </div>
     </form>
   </div>
@@ -449,7 +610,7 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Client-side validation for Add modal
+  // Client-side validation
   (() => {
     const forms = document.querySelectorAll('.needs-validation');
     Array.from(forms).forEach(form => {
@@ -462,25 +623,77 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
       }, false);
     });
   })();
+ // VIEW modal populate
+const viewModal = document.getElementById('viewModal');
+if (viewModal){
+  viewModal.addEventListener('show.bs.modal', (e) => {
+    const b = e.relatedTarget;
 
-  // Edit modal populate
+    const first  = b.getAttribute('data-first')  || '';
+    const middle = b.getAttribute('data-middle') || '';
+    const last   = b.getAttribute('data-last')   || '';
+    const suffix = b.getAttribute('data-suffix') || '';
+    const fullname = [first, middle, last].filter(Boolean).join(' ') + (suffix ? ' ' + suffix : '');
+
+    // Fill fields
+    document.getElementById('v-fullname').textContent = fullname.trim();
+    document.getElementById('v-email').textContent    = b.getAttribute('data-email')     || '';
+    document.getElementById('v-studentid').textContent= b.getAttribute('data-student_id')|| '';
+    document.getElementById('v-course').textContent   = b.getAttribute('data-course')    || '';
+    document.getElementById('v-year').textContent     = b.getAttribute('data-year')      || '';
+    document.getElementById('v-section').textContent  = b.getAttribute('data-section')   || '';
+    document.getElementById('v-suffix').textContent   = suffix || 'N/A';
+    document.getElementById('v-status').textContent   = b.getAttribute('data-status')    || '';
+    document.getElementById('v-remarks').textContent  = b.getAttribute('data-remarks')   || '';
+    document.getElementById('view-email-top').textContent = b.getAttribute('data-email') || '';
+
+    // Badges 
+    const sBadge = document.getElementById('view-status-badge');
+    const status = (b.getAttribute('data-status') || '').toLowerCase();
+    sBadge.textContent = (status || 'Status');
+    sBadge.className = 'badge badge-pill ' + (status==='active' ? 'badge-active' : 'badge-inactive');
+
+    const rBadge = document.getElementById('view-remarks-badge');
+    const remarks = b.getAttribute('data-remarks') || '';
+    if (remarks) {
+      rBadge.textContent = remarks;
+      rBadge.classList.remove('d-none');
+    } else {
+      rBadge.classList.add('d-none');
+    }
+  });
+}
+  // Edit modal populate (all fields)
   const editModal = document.getElementById('editModal');
-  editModal.addEventListener('show.bs.modal', (e) => {
-    const b = e.relatedTarget;
-    document.getElementById('edit-id').value     = b.getAttribute('data-id');
-    document.getElementById('edit-first').value  = b.getAttribute('data-first')  || '';
-    document.getElementById('edit-middle').value = b.getAttribute('data-middle') || '';
-    document.getElementById('edit-last').value   = b.getAttribute('data-last')   || '';
-    document.getElementById('edit-email').value  = b.getAttribute('data-email')  || '';
-  });
+  if (editModal) {
+    editModal.addEventListener('show.bs.modal', (e) => {
+      const b = e.relatedTarget;
+      const set = (id, v='') => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
 
-  // Delete modal populate
-  const deleteModal = document.getElementById('deleteModal');
-  deleteModal.addEventListener('show.bs.modal', (e) => {
-    const b = e.relatedTarget;
-    document.getElementById('delete-id').value = b.getAttribute('data-id');
-    document.getElementById('delete-name').textContent = b.getAttribute('data-name');
-  });
+      set('edit-id',          b.getAttribute('data-id'));
+      set('edit-student_id',  b.getAttribute('data-student_id'));
+      set('edit-course',      b.getAttribute('data-course'));
+      set('edit-year',        b.getAttribute('data-year'));
+      set('edit-first',       b.getAttribute('data-first'));
+      set('edit-middle',      b.getAttribute('data-middle'));
+      set('edit-last',        b.getAttribute('data-last'));
+      set('edit-suffix',      b.getAttribute('data-suffix') || 'N/A');
+      set('edit-section',     b.getAttribute('data-section'));
+      set('edit-status',      b.getAttribute('data-status'));
+      set('edit-email',       b.getAttribute('data-email'));
+      set('edit-remarks',     b.getAttribute('data-remarks') || '');
+    });
+  }
+
+  // Delete modal populate (single)
+  const delModal = document.getElementById('deleteConfirmModal');
+  if (delModal) {
+    delModal.addEventListener('show.bs.modal', (e) => {
+      const b = e.relatedTarget;
+      document.getElementById('delete-id').value = b.getAttribute('data-id');
+      document.getElementById('delete-name').textContent = b.getAttribute('data-name') || '';
+    });
+  }
 
   // Select all + bulk state
   const selectAll = document.getElementById('selectAll');
@@ -489,7 +702,7 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
 
   function refreshBulkState(){
     const any = rowChecks.some(c => c.checked);
-    bulkBtn.disabled = !any;
+    if (bulkBtn) bulkBtn.disabled = !any;
   }
   if (selectAll){
     selectAll.addEventListener('change', ()=>{
@@ -498,11 +711,10 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
     });
   }
   rowChecks.forEach(c => c.addEventListener('change', ()=>{
-    if (!c.checked) selectAll.checked = false;
+    if (!c.checked && selectAll) selectAll.checked = false;
     refreshBulkState();
   }));
 
-  // Prepare IDs for bulk delete (if you build delete_bulk.php)
   function prepBulkDelete(){
     const ids = rowChecks.filter(c => c.checked).map(c => c.value).join(',');
     const hiddenA = document.getElementById('bulkIds');
@@ -512,13 +724,16 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
     return ids.length>0;
   }
   window.prepBulkDelete = prepBulkDelete;
+
+  // Show success popup when ?status=success
   (function showSuccessIfPresent(){
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'success') {
-      const modal = new bootstrap.Modal(document.getElementById('successAddedModal'));
+      const modalEl = document.getElementById('successAddedModal');
+      const modal   = new bootstrap.Modal(modalEl, { backdrop: true, keyboard: false });
       modal.show();
 
-      // Clear the success params when continuing (and reset to page 1)
+      // Clear status/msg on Continue and reset to page 1
       document.getElementById('successContinueBtn').addEventListener('click', ()=>{
         const keep = new URLSearchParams(window.location.search);
         keep.delete('status'); keep.delete('msg');
@@ -529,6 +744,31 @@ function sortLink($label,$key,$sort,$dir,$page,$per,$q){
       });
     }
   })();
+   (function () {
+    const form = document.querySelector('form[role="search"]');
+    if (!form) return;
+
+    // Live search (debounced).
+    const input = form.querySelector('input[name="q"]');
+    let t = null, last = input.value;
+    input.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        if (input.value !== last) {
+          last = input.value;
+          form.querySelector('input[name="page"]').value = '1';
+          form.submit();
+        }
+      }, 400); 
+    });
+
+    // If user presses Enter, also reset to page 1
+    form.addEventListener('submit', () => {
+      const p = form.querySelector('input[name="page"]');
+      if (p) p.value = '1';
+    });
+  })();
+</script>
 </script>
 </body>
 </html>

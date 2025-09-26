@@ -1,10 +1,9 @@
 <?php
-// Show errors while building
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-/* ---------- connection ---------- */
+/* Connections */
 $DB_HOST = '127.0.0.1';
 $DB_USER = 'root';
 $DB_PASS = '';
@@ -16,16 +15,11 @@ if ($mysqli->connect_errno) {
   die('Failed to connect to MySQL: ' . $mysqli->connect_error);
 }
 
-// Create DB if needed and use it
+// Create DB if needed 
 $mysqli->query("CREATE DATABASE IF NOT EXISTS `$DB_NAME` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
 $mysqli->select_db($DB_NAME);
 $mysqli->set_charset('utf8mb4');
 
-/* ---------- table (matches your screenshot) ----------
-   id, first_name, last_name, email, created_at,
-   student_id, middle_name, course, year, section, remarks, status
-   (NO suffix here)
-------------------------------------------------------- */
 $createSql = "CREATE TABLE IF NOT EXISTS students (
   id           INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   first_name   VARCHAR(100) NOT NULL,
