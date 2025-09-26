@@ -39,7 +39,7 @@ It also supports sorting, pagination, and server-side validation, ensuring clean
 
 Create the database and table:
 
-SQL:
+```sql
 CREATE TABLE students (
   id INT AUTO_INCREMENT PRIMARY KEY,
   student_id VARCHAR(50) NOT NULL UNIQUE,
