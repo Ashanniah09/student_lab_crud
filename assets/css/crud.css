@@ -1,0 +1,293 @@
+/* ===================== DARK THEME ===================== */
+/* Palette tuned to a navy dashboard look */
+:root{
+  --dark-bg-900:#ffff;     /* page background */
+  --dark-bg-800:#111a2c;     /* app shell / header */
+  --dark-surface:#182235;    /* cards / modals */
+  --dark-surface-2:#1e2a41;  /* table head / raised */
+  --dark-border:#273650;     /* subtle borders */
+  --dark-hover:#223252;      /* row hover */
+  --text-strong:#e8edf7;
+  --text-muted:#a8b5cc;
+
+  /* accents (match the dashboard vibe) */
+  --accent:#3b82f6;          /* blue */
+  --accent-2:#0cb84b;        /* green */
+  --accent-3:#f59e0b;        /* amber */
+  --danger:#ef4444;
+
+  /* reuse for Poppins/purple modal */
+  --input-radius:12px;
+}
+
+/* Page */
+body.theme-dark {
+  background: #ffff; 
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+  padding-top: 60px; 
+}
+.theme-dark .table-wrapper{
+  background:var(--dark-surface);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+  border:1px solid var(--dark-border);
+}
+.theme-dark .table-title{
+  background:var(--dark-bg-800);
+  color:var(--text-strong);
+  border-bottom:1px solid var(--dark-border);
+}
+.theme-dark .table-title h2{ color:var(--text-strong); }
+
+/* Buttons */
+.theme-dark .btn-success{ background:var(--accent-2); border-color:var(--accent-2); }
+.theme-dark .btn-success:hover{ filter:brightness(.95); }
+.theme-dark .btn-danger{ background:var(--danger); border-color:var(--danger); }
+.theme-dark .btn-danger:hover{ filter:brightness(.95); }
+
+/* Table */
+.theme-dark .table{ color:var(--text-strong); }
+.theme-dark .table thead th{
+  background:var(--dark-surface-2)!important;
+  color:var(--text-muted);
+  border-bottom:1px solid var(--dark-border);
+}
+.theme-dark .table td, 
+.theme-dark .table th{
+  border-color:var(--dark-border);
+}
+.theme-dark .table-striped tbody tr:nth-of-type(odd){
+  background:rgba(255,255,255,.02);
+}
+.theme-dark .table-hover tbody tr:hover{
+  background:var(--dark-hover);
+}
+.theme-dark .sort-link{ color:var(--text-strong); }
+.theme-dark .sort-link:hover{ color:var(--accent); }
+
+/* Pagination */
+.theme-dark .pagination .page-link{
+  background:transparent; color:var(--text-muted);
+}
+.theme-dark .pagination .page-item.active .page-link{
+  background:var(--accent); color:#0b1220;
+}
+.theme-dark .pagination .page-link:hover{ color:#fff; }
+
+/* Alerts */
+.theme-dark .alert-success{ background:rgba(34,197,94,.15); color:#9be7b4; border:1px solid rgba(34,197,94,.35); }
+.theme-dark .alert-danger{  background:rgba(239,68,68,.15); color:#f5a3a3; border:1px solid rgba(239,68,68,.35); }
+
+/* Checkboxes (keep your custom look, tweak colors) */
+.theme-dark .custom-checkbox label:before{
+  background:transparent; border-color:var(--dark-border);
+}
+.theme-dark .custom-checkbox input[type="checkbox"]:checked + label:before{
+  background:var(--accent); border-color:var(--accent);
+}
+/* Outer spacing for the main container */
+.container {
+  margin: 60px auto;   /* top/bottom 60px, auto center horizontally */
+  padding: 0 40px 40px 40px; /* left, right, bottom padding */
+}
+/* Add breathing space inside the title bar */
+.table-title {
+  padding: 20px 30px;  /* more padding all around */
+  margin: 20px;        /* space between the card and others */
+  border-radius: 8px 8px 0 0;
+}
+
+/* Space for buttons */
+.table-title .btn {
+  margin-left: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+}
+.table-title h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700; /* full bold */
+}
+/* Modals (global dark) */
+.theme-dark .modal-content{
+  background:var(--dark-surface);
+  color:var(--text-strong);
+  border:1px solid var(--dark-border);
+}
+.soft-input.form-control {
+  font-size: 15px;   /* adjust text size */
+  padding: 0.45rem 0.75rem;
+  height: auto;        /* auto instead of forced large */
+}
+
+.soft-input.form-select {
+  font-size: 16px;   /* adjust text size */
+  padding: 0.45rem 0.75rem;
+  height: auto;        /* auto instead of forced large */
+}
+/* White button style for Add Student */
+.btn-light-dark {
+  background: #ffffff;
+  color: #111a2c;        /* dark navy text */
+  font-weight: 600;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-light-dark:hover {
+  background: #f1f1f1;
+  color: #000;           /* darker text on hover */
+  border-color: #ccc;
+}
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 10px 10px 10px; /* start=20px, end=20px, bottom=20px */
+}
+
+/* Special purple Add Student header still applies */
+
+.theme-dark .modal-footer{ background:rgba(255,255,255,.03); border-top:1px solid var(--dark-border); }
+.theme-dark .modal .form-label,
+.theme-dark .modal .form-label.text-muted {
+  color: #ffffff !important;
+}
+/* Inputs */
+.theme-dark .soft-input.form-control,
+.theme-dark .soft-input.form-select{
+  background:#0f1a2e; 
+  color:var(--text-strong);
+  border:1px solid var(--dark-border);
+  border-radius:var(--input-radius);
+}
+.theme-dark .soft-input::placeholder{ color:#7284a3; }
+.theme-dark .soft-input:focus{
+  border-color:#415b86;
+  box-shadow:0 0 0 .25rem rgba(59,130,246,.15);
+}
+
+/* Links / icons in actions */
+.theme-dark a.edit{ color:#fbbf24; }   /* amber */
+.theme-dark a.delete{ color:var(--danger); }
+.theme-dark a.edit:hover, .theme-dark a.delete:hover{ filter:brightness(1.1); }
+
+/* Badge/hint text */
+.theme-dark .hint-text{ color:var(--text-muted); }
+
+/* Search bar pill styling */
+.search-wrap {
+  flex: 1;
+  min-width: 350px;
+}
+
+.search-pill {
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  background: #fff; /* white background */
+}
+
+.search-pill .form-control {
+  border: none;
+  box-shadow: none;
+  background: #fff !important; /* force white bg */
+  color: #111 !important;       /* dark text */
+  font-size: 15px;
+}
+
+.search-pill .form-control::placeholder {
+  color: #666;  /* subtle gray placeholder */
+}
+
+.search-pill .input-group-text {
+  background: #fff !important;
+  border: none;
+  color: #666;
+}
+
+.search-pill .btn-clear {
+  border: none;
+  background: transparent;
+  color: #666;
+  padding: 0 12px;
+}
+
+.search-pill .btn-clear:hover {
+  color: #000;
+}
+
+/* focus ring */
+.search-pill:focus-within {
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+/* Dark theme compatibility */
+.theme-dark .search-pill {
+  background: #0f1a2e;
+  border-color: #273650;
+}
+.theme-dark .search-pill .input-group-text { color: #8aa0c0; }
+.theme-dark .search-pill .form-control { color: #e8edf7; }
+.theme-dark .search-pill .form-control::placeholder { color: #6f86a8; }
+.theme-dark .search-pill .btn-clear { color: #6f86a8; }
+.theme-dark .search-pill .btn-clear:hover { color: #9db6da; }
+.theme-dark .search-pill:focus-within {
+  border-color: #415b86;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+}
+/* ================= Success Popup (green check) ================= */
+/* --- Success Popup (matches screenshot) --- */
+.success-card{
+  background:#16243a;          /* deep navy */
+  border:0;
+  border-radius:22px;           /* chunky rounded corners */
+  color:#fff;
+  padding:28px 28px 24px 28px;  /* roomy */
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+
+.success-body{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.success-icon{
+  width:112px;
+  height:112px;
+  margin-inline:auto;
+  border-radius:50%;
+  background:#00e023;           /* bright green */
+  display:grid;
+  place-items:center;
+  box-shadow:0 10px 24px rgba(0,224,35,.35), inset 0 -6px 10px rgba(0,0,0,.25);
+  color:#fff;
+  font-size:64px;               /* check size */
+}
+
+.success-title{
+  margin:0;
+  text-align:center;
+  font-weight:600;
+  font-size:28px;               /* similar to screenshot */
+  letter-spacing:.2px;
+}
+
+.success-cta{
+  background:#00e023;
+  color:#0b1220;
+  font-weight:800;
+  border:0;
+  border-radius:14px;
+  padding:10px 22px;
+  line-height:1.1;
+  box-shadow:0 6px 16px rgba(0,224,35,.35);
+}
+.success-cta:hover{ filter:brightness(.97); }
+.success-cta:active{ transform:translateY(1px); }
