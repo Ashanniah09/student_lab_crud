@@ -15,7 +15,7 @@ It also supports sorting, pagination, and server-side validation, ensuring clean
 - Soft-delete students (confirmation modal before removal)  
 - Sorting by columns (ID, Name, Email, Course, Year, etc.)  
 - Pagination for long student lists  
-- Search bar (filter records across all fields)  
+- Search bar (search information)
 - Dark theme design with consistent modals (Add, View, Edit, Delete)  
 - Duplicate checking on email address  
 - Success and error popups with Bootstrap modals  
